@@ -2,7 +2,7 @@
     "name": "daylerees/container-debug",
     "description": "Inspect the Laravel IoC Container from Artisan.",
     "keywords": ["laravel", "command", "container", "debug"],
-    "license": "MIT <http://opensource.org/licenses/MIT>",
+    "license": "MIT",
     "authors": [
         {
             "name": "Dayle Rees",
