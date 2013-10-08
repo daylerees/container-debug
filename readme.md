@@ -1,6 +1,8 @@
+[![Build Status](https://travis-ci.org/daylerees/container-debug.png)](https://travis-ci.org/daylerees/container-debug.png)
+
 # Container Debug
 
-The container debug command can be used to inspect the Laravel four service container. It will show a list of all bindings, their types, values if scalar, and the time it takes to resolve each binding.
+The container debug command can be used to inspect the Laravel four service container. It's similar to the container:debug from the Symfony framework. It will show a list of all bindings, their types, values if scalar, and the time it takes to resolve each binding.
 
 ## Installation
 
