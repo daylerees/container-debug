@@ -217,7 +217,7 @@ class Command extends IlluminateCommand
     protected function getArguments()
     {
         return array(
-            array('prefix', InputArgument::OPTIONAL, 'Only list classes with have a certain prefix.', ''),
+            array('prefix', InputArgument::OPTIONAL, 'Only list services which have a certain prefix.', ''),
         );
     }
 }
