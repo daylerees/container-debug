@@ -1,10 +1,27 @@
 <?php
 
 use Mockery as m;
+use Illuminate\Container\Container;
 use DayleRees\ContainerDebug\Command;
 
 class CommandTest extends PHPUnit_Framework_TestCase
 {
+    public function setUp()
+    {
+        $this->configure();
+    }
+
+    public function configure($prefix = '')
+    {
+        $this->container = new Container;
+        $this->container['chocolate'] = 'sweet';
+        $this->container['apple'] = 'fruit';
+
+        $this->command = m::mock('DayleRees\ContainerDebug\Command[argument]');
+        $this->command->setLaravel($this->container);
+        $this->command->shouldReceive('argument')->with('prefix')->andReturn($prefix);
+    }
+
     public function testCommandCanBeCreated()
     {
         $command = new Command;
@@ -12,43 +29,53 @@ class CommandTest extends PHPUnit_Framework_TestCase
 
     public function testContainerBindingsCanBeRetrieved()
     {
-        $container = m::mock('Illuminate\Container\Container');
-        $container->shouldReceive('getBindings')
-                  ->once()
-                  ->andReturn(array(
-                    'chocolate' => 'sweet',
-                    'apple'     => 'fruit'
-                  ));
-        $command = new Command;
-        $command->setLaravel($container);
-        $result = $command->getContainerBindings();
-        $this->assertEquals(array(
-            'apple'     => 'fruit',
-            'chocolate' => 'sweet'
-        ), $result);
+        $result = $this->command->getContainerBindings();
+        $this->assertEquals(array('apple', 'chocolate'), $result);
+    }
+
+    public function testRowsCanBeBuild()
+    {
+        $rows = $this->command->buildTableRows(array('apple', 'chocolate'));
+
+        $this->assertCount(2, $rows);
+        $this->assertEquals('apple', $rows[0][0]);
+        $this->assertEquals('<string> "fruit"', $rows[0][1]);
+        $this->assertEquals('chocolate', $rows[1][0]);
+        $this->assertEquals('<string> "sweet"', $rows[1][1]);
+    }
+
+    public function testRowsCanBeFilteredWithPrefix()
+    {
+        $this->configure('choc');
+
+        $rows = $this->command->buildTableRows(array('apple', 'chocolate'));
+
+        $this->assertCount(1, $rows);
+        $this->assertEquals('chocolate', $rows[0][0]);
+        $this->assertEquals('<string> "sweet"', $rows[0][1]);
+    }
+
+    public function testExceptionDuringResolvingIsHandled()
+    {
+        $this->container['foo'] = function() { throw new \Exception; };
+
+        $row = $this->command->buildServiceRow('foo');
+
+        $this->assertEquals(
+            array('foo', 'Unable to resolve service.', 'N/A'),
+            $row
+        );
     }
 
     public function testThatAServiceCanBeResolved()
     {
-        $container = m::mock('Illuminate\Container\Container');
-        $container->shouldReceive('make')
-                  ->once()
-                  ->andReturn('bar');
-        $command = new Command;
-        $command->setLaravel($container);
-        $result = $command->resolveService('foo');
-        $this->assertEquals('bar', $result);
+        $result = $this->command->resolveService('apple');
+        $this->assertEquals('fruit', $result);
     }
 
     public function testThatAServiceResolutionTimeCanBeCalculated()
     {
-        $container = m::mock('Illuminate\Container\Container');
-        $container->shouldReceive('make')
-                  ->once()
-                  ->andReturn('bar');
-        $command = new Command;
-        $command->setLaravel($container);
-        $result = $command->calculateServiceResolutionTime('foo');
+        $result = $this->command->calculateServiceResolutionTime('apple');
         $this->assertTrue(is_numeric($result));
         $this->assertTrue($result > 0);
     }

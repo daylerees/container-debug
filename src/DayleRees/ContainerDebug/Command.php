@@ -99,21 +99,37 @@ class Command extends IlluminateCommand
      */
     public function buildTableRows($services)
     {
+        $prefix = $this->argument('prefix');
+
         $rows = array();
-        foreach (array_keys($services) as $identifier) {
-            try {
-                $service = $this->resolveService($identifier);
-                $rows[] = array(
-                    $identifier,
-                    $this->getServiceDescription($service),
-                    $this->calculateServiceResolutionTime($identifier)
-                );
-            }
-            catch (Exception $e) {
-                $rows[] = array($identifier, 'Unable to resolve service.', 'N/A');
+        foreach ($services as $identifier) {
+            if (empty($prefix) || strpos($identifier, $prefix) === 0)
+            {
+                $rows[] = $this->buildServiceRow($identifier);
             }
         }
         return $rows;
+    }
+
+    /**
+     * Builds a row for the service with the given identifier.
+     *
+     * @param  string $identifier
+     * @return array
+     */
+    public function buildServiceRow($identifier)
+    {
+        try {
+            $service = $this->resolveService($identifier);
+            return array(
+                $identifier,
+                $this->getServiceDescription($service),
+                $this->calculateServiceResolutionTime($identifier)
+            );
+        }
+        catch (Exception $e) {
+            return array($identifier, 'Unable to resolve service.', 'N/A');
+        }
     }
 
     /**
@@ -123,8 +139,8 @@ class Command extends IlluminateCommand
      */
     public function getContainerBindings()
     {
-        $bindings = $this->laravel->getBindings();
-        ksort($bindings);
+        $bindings = array_keys($this->laravel->getBindings());
+        sort($bindings);
         return $bindings;
     }
 
@@ -191,5 +207,17 @@ class Command extends IlluminateCommand
     public function serviceIsObject($service)
     {
         return gettype($service) === 'object';
+    }
+
+    /**
+     * Get the console command arguments.
+     *
+     * @return array
+     */
+    protected function getArguments()
+    {
+        return array(
+            array('prefix', InputArgument::OPTIONAL, 'Only list services which have a certain prefix.', ''),
+        );
     }
 }
