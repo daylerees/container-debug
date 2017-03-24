@@ -11,8 +11,8 @@
         }
     ],
     "require": {
-        "illuminate/container": "4.*",
-        "illuminate/console": "4.*"
+        "illuminate/container": "5.*",
+        "illuminate/console": "5.*"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.*",
