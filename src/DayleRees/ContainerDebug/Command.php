@@ -5,6 +5,7 @@ namespace DayleRees\ContainerDebug;
 use Exception;
 use Illuminate\Console\Application;
 use Illuminate\Container\Container;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\TableHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -59,8 +60,9 @@ class Command extends IlluminateCommand
     public function fire()
     {
         $services = $this->getContainerBindings();
-        $table = $this->buildServiceTable($services);
+        $table = $this->buildServiceTable($services, $this->output);
         $table->render($this->output);
+//        var_dump($this->output);
     }
 
     /**
@@ -69,11 +71,16 @@ class Command extends IlluminateCommand
      * @param  array $services
      * @return TableHelper
      */
-    public function buildServiceTable($services)
+    public function buildServiceTable($services, $output)
     {
-        $table = new TableHelper;
-        $table->setHeaders($this->buildTableHeaders());
-        $table->setRows($this->buildTableRows($services));
+        $table = new Table($output);
+
+        $headers = $this->buildTableHeaders();
+        $table->setHeaders($headers);
+
+        $rows = $this->buildTableRows($services);
+        $table->setRows($rows);
+
         return $table;
     }
 
@@ -136,7 +143,15 @@ class Command extends IlluminateCommand
      */
     public function resolveService($identifier)
     {
-        return $this->laravel->make($identifier);
+        try
+        {
+            return $this->laravel->make($identifier);
+        } catch (\Throwable $expObj)
+        {
+             return 'Caught exception: '.  $expObj->getMessage();
+//            throw new \Exception('Caught ' . $expObj->getMessage(), $expObj->getCode(), $expObj);
+        }
+
     }
 
     /**
