@@ -52,11 +52,21 @@ class Command extends IlluminateCommand
     protected $description = 'View the contents of the IoC container.';
 
     /**
-     * Execute the command.
+     * Execute the command (pre-5.5).
      *
      * @return void
      */
     public function fire()
+    {
+        $this->handle();
+    }
+
+    /**
+     * Execute the command (5.5).
+     *
+     * @return void
+     */
+    public function handle()
     {
         $services = $this->getContainerBindings();
         $table = $this->buildServiceTable($services);
