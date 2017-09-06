@@ -8,7 +8,7 @@ The container debug command can be used to inspect the Laravel four service cont
 
 Add the following dependency to your Laravel project:
 
-    "daylerees/container-debug": "4.0.*"
+    "daylerees/container-debug": "5.0.x-dev"
 
 Now run...
 
@@ -26,6 +26,12 @@ to download the package. Now add the service provider to your project configurat
     ),
 
 Now you can execute the command using the Artisan CLI tool.
+
+Caveat: if your app defines more services beyond the framework default and its 
+own, be sure to also require them using composer, as they will need to be 
+resolved in order to be enumerated by this command. Otherwise you are likely to 
+encounter `Class not found` errors from the autoloader.
+
 
 ## Usage
 
