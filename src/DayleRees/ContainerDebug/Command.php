@@ -5,8 +5,8 @@ namespace DayleRees\ContainerDebug;
 use Exception;
 use Illuminate\Console\Application;
 use Illuminate\Container\Container;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Helper\TableHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Illuminate\Console\Command as IlluminateCommand;
 
@@ -52,11 +52,21 @@ class Command extends IlluminateCommand
     protected $description = 'View the contents of the IoC container.';
 
     /**
-     * Execute the command.
+     * Execute the command (pre-5.5).
      *
      * @return void
      */
     public function fire()
+    {
+        $this->handle();
+    }
+
+    /**
+     * Execute the command (5.5).
+     *
+     * @return void
+     */
+    public function handle()
     {
         $services = $this->getContainerBindings();
         $table = $this->buildServiceTable($services);
@@ -67,11 +77,11 @@ class Command extends IlluminateCommand
      * Construct an ASCII table to display services.
      *
      * @param  array $services
-     * @return TableHelper
+     * @return \Symfony\Component\Console\Helper\Table
      */
     public function buildServiceTable($services)
     {
-        $table = new TableHelper;
+        $table = new Table($this->getOutput());
         $table->setHeaders($this->buildTableHeaders());
         $table->setRows($this->buildTableRows($services));
         return $table;
